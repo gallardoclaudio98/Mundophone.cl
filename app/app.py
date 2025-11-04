@@ -21,7 +21,7 @@ def placeholder_page(title: str) -> rx.Component:
             rx.el.main(
                 rx.el.div(
                     rx.el.h1(title, class_name="text-3xl font-bold"),
-                    rx.el.p("This page is under construction."),
+                    rx.el.p("Esta página está en construcción."),
                     class_name="container mx-auto px-4 py-12 text-center",
                 ),
                 class_name="flex-grow",

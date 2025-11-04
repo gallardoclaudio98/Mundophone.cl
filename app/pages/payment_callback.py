@@ -10,64 +10,63 @@ def payment_callback() -> rx.Component:
         rx.el.main(
             rx.el.div(
                 rx.cond(
-                    PaymentState.payment_status == "Success",
+                    PaymentState.payment_status == "Éxito",
                     rx.el.div(
                         rx.icon(
                             "check_check",
                             class_name="h-16 w-16 text-green-500 mx-auto mb-4",
                         ),
                         rx.el.h1(
-                            "Payment Successful",
-                            class_name="text-3xl font-bold text-center",
+                            "Pago Exitoso", class_name="text-3xl font-bold text-center"
                         ),
                         rx.el.p(
-                            "Your order is being processed.",
+                            "Tu orden está siendo procesada.",
                             class_name="text-center mt-2",
                         ),
                         rx.el.a(
-                            "View my orders",
+                            "Ver mis órdenes",
                             href="/profile",
                             class_name="mt-6 inline-block bg-violet-500 text-white px-6 py-2 rounded-lg",
                         ),
                     ),
                     rx.cond(
-                        PaymentState.payment_status == "Failed",
+                        PaymentState.payment_status == "Fallido",
                         rx.el.div(
                             rx.icon(
                                 "circle_x",
                                 class_name="h-16 w-16 text-red-500 mx-auto mb-4",
                             ),
                             rx.el.h1(
-                                "Payment Failed",
+                                "Pago Fallido",
                                 class_name="text-3xl font-bold text-center",
                             ),
                             rx.el.p(
-                                "There was an issue with your payment. Please try again.",
+                                "Hubo un problema con tu pago. Por favor, intenta de nuevo.",
                                 class_name="text-center mt-2",
                             ),
                             rx.el.a(
-                                "Go to cart",
+                                "Ir al carrito",
                                 href="/cart",
                                 class_name="mt-6 inline-block bg-gray-500 text-white px-6 py-2 rounded-lg",
                             ),
                         ),
                         rx.cond(
-                            PaymentState.payment_status == "Cancelled",
+                            PaymentState.payment_status == "Cancelado",
                             rx.el.div(
                                 rx.icon(
                                     "ban",
                                     class_name="h-16 w-16 text-yellow-500 mx-auto mb-4",
                                 ),
                                 rx.el.h1(
-                                    "Payment Cancelled",
+                                    "Pago Cancelado",
                                     class_name="text-3xl font-bold text-center",
                                 ),
                                 rx.el.p(
-                                    "You have cancelled the payment.",
+                                    "Has cancelado el pago.",
                                     class_name="text-center mt-2",
                                 ),
                                 rx.el.a(
-                                    "Go to cart",
+                                    "Ir al carrito",
                                     href="/cart",
                                     class_name="mt-6 inline-block bg-gray-500 text-white px-6 py-2 rounded-lg",
                                 ),
@@ -78,11 +77,11 @@ def payment_callback() -> rx.Component:
                                     class_name="h-16 w-16 text-gray-500 mx-auto animate-spin mb-4",
                                 ),
                                 rx.el.h1(
-                                    "Confirming Payment...",
+                                    "Confirmando Pago...",
                                     class_name="text-3xl font-bold text-center",
                                 ),
                                 rx.el.p(
-                                    "Please do not close this page.",
+                                    "Por favor, no cierres esta página.",
                                     class_name="text-center mt-2",
                                 ),
                             ),

@@ -75,7 +75,7 @@ def navbar() -> rx.Component:
                         class_name="flex items-center gap-2",
                     ),
                     rx.el.a(
-                        "Sign In",
+                        "Iniciar Sesión",
                         href="/sign-in",
                         class_name="px-4 py-2 text-sm font-medium text-violet-600 border border-violet-200 rounded-lg hover:bg-violet-50",
                     ),

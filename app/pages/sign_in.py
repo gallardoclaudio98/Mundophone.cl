@@ -4,21 +4,27 @@ from app.state import AuthState
 
 def sign_in_card():
     return rx.el.div(
-        rx.el.h2("Sign In", class_name="text-2xl font-bold text-center text-gray-800"),
+        rx.el.h2(
+            "Iniciar Sesión", class_name="text-2xl font-bold text-center text-gray-800"
+        ),
         rx.el.form(
             rx.el.div(
-                rx.el.label("Email", class_name="text-sm font-medium text-gray-700"),
+                rx.el.label(
+                    "Correo Electrónico", class_name="text-sm font-medium text-gray-700"
+                ),
                 rx.el.input(
                     type="email",
                     name="email",
-                    placeholder="user@example.com",
+                    placeholder="usuario@ejemplo.com",
                     required=True,
                     class_name="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500",
                 ),
                 class_name="mb-4",
             ),
             rx.el.div(
-                rx.el.label("Password", class_name="text-sm font-medium text-gray-700"),
+                rx.el.label(
+                    "Contraseña", class_name="text-sm font-medium text-gray-700"
+                ),
                 rx.el.input(
                     type="password",
                     name="password",
@@ -28,7 +34,7 @@ def sign_in_card():
                 class_name="mb-6",
             ),
             rx.el.button(
-                "Sign In",
+                "Iniciar Sesión",
                 type="submit",
                 class_name="w-full bg-violet-500 text-white py-3 rounded-lg hover:bg-violet-600 transition-colors duration-300 shadow-md hover:shadow-lg",
             ),
@@ -38,20 +44,22 @@ def sign_in_card():
         ),
         rx.el.div(
             rx.el.div(class_name="flex-grow border-t border-gray-300"),
-            rx.el.span("OR", class_name="px-4 text-sm text-gray-500"),
+            rx.el.span("O", class_name="px-4 text-sm text-gray-500"),
             rx.el.div(class_name="flex-grow border-t border-gray-300"),
             class_name="flex items-center my-6",
         ),
         rx.el.button(
             rx.el.img(src="placeholder.svg", class_name="h-5 w-5 mr-3"),
-            "Continue with Google",
+            "Continuar con Google",
             on_click=AuthState.initiate_google_oauth,
             class_name="w-full flex justify-center items-center bg-white text-gray-700 py-3 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-300 shadow-sm",
         ),
         rx.el.p(
-            "Don't have an account? ",
+            "¿No tienes una cuenta? ",
             rx.el.a(
-                "Sign Up", href="/sign-up", class_name="text-violet-600 hover:underline"
+                "Regístrate",
+                href="/sign-up",
+                class_name="text-violet-600 hover:underline",
             ),
             class_name="text-center text-sm text-gray-600 mt-6",
         ),

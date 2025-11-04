@@ -35,12 +35,12 @@ def product_card(product: Product) -> rx.Component:
         ),
         rx.el.div(
             rx.el.button(
-                "View Details",
+                "Ver Detalles",
                 on_click=rx.redirect(f"/product/{product['id']}"),
                 class_name="w-full bg-violet-500 text-white py-2 rounded-lg hover:bg-violet-600 transition-all duration-300 shadow-md hover:shadow-lg",
             ),
             rx.el.button(
-                "Buy Now",
+                "Comprar Ahora",
                 on_click=MainState.buy_now(product["id"], 1, product["colors"][0]),
                 class_name="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-all duration-300 shadow-md hover:shadow-lg mt-2",
             ),
@@ -56,11 +56,11 @@ def index() -> rx.Component:
         rx.el.main(
             rx.el.div(
                 rx.el.h1(
-                    "Find Your Next Phone",
+                    "Encuentra tu Próximo Teléfono",
                     class_name="text-4xl font-bold text-gray-900",
                 ),
                 rx.el.p(
-                    "Top models from leading brands, just for you.",
+                    "Los mejores modelos de las marcas líderes, solo para ti.",
                     class_name="text-lg text-gray-600 mt-2",
                 ),
                 class_name="text-center py-16 bg-violet-50 rounded-xl",
@@ -68,12 +68,12 @@ def index() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.el.input(
-                        placeholder="Search for a phone...",
+                        placeholder="Buscar un teléfono...",
                         on_change=MainState.set_search_query.debounce(300),
                         class_name="w-full md:w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:outline-none",
                     ),
                     rx.el.select(
-                        rx.el.option("All Brands", value=""),
+                        rx.el.option("Todas las Marcas", value=""),
                         rx.foreach(
                             MainState.brands,
                             lambda brand: rx.el.option(brand, value=brand),

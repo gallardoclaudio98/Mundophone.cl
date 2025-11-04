@@ -7,17 +7,17 @@ from app.components.footer import footer
 def order_card(order: Order) -> rx.Component:
     return rx.el.div(
         rx.el.div(
-            rx.el.h3(f"Order #{order['id']}", class_name="font-semibold text-lg"),
+            rx.el.h3(f"Orden #{order['id']}", class_name="font-semibold text-lg"),
             rx.el.span(
                 order["status"],
                 class_name=rx.cond(
-                    order["status"] == "Delivered",
+                    order["status"] == "Entregado",
                     "bg-green-100 text-green-800",
                     rx.cond(
-                        order["status"] == "Shipped",
+                        order["status"] == "Enviado",
                         "bg-blue-100 text-blue-800",
                         rx.cond(
-                            order["status"] == "Processing",
+                            order["status"] == "Procesando",
                             "bg-yellow-100 text-yellow-800",
                             "bg-orange-100 text-orange-800",
                         ),
@@ -29,9 +29,9 @@ def order_card(order: Order) -> rx.Component:
         ),
         rx.el.p(f"Total: ${order['total']:.2f}", class_name="text-gray-600 my-2"),
         rx.el.button(
-            "Request Revision",
+            "Solicitar Revisión",
             on_click=lambda: MainState.request_revision(order["id"]),
-            disabled=order["status"] != "Delivered",
+            disabled=order["status"] != "Entregado",
             class_name="w-full text-sm py-2 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed",
         ),
         class_name="p-4 bg-white border rounded-lg shadow-sm",
@@ -44,15 +44,15 @@ def profile() -> rx.Component:
         rx.el.main(
             rx.el.div(
                 rx.el.div(
-                    rx.el.h1("My Profile", class_name="text-3xl font-bold"),
+                    rx.el.h1("Mi Perfil", class_name="text-3xl font-bold"),
                     rx.el.button(
-                        "Sign Out",
+                        "Cerrar Sesión",
                         on_click=AuthState.sign_out,
                         class_name="bg-red-500 text-white px-4 py-2 rounded-lg",
                     ),
                     class_name="flex justify-between items-center mb-8",
                 ),
-                rx.el.h2("My Orders", class_name="text-2xl font-semibold mb-4"),
+                rx.el.h2("Mis Órdenes", class_name="text-2xl font-semibold mb-4"),
                 rx.el.div(
                     rx.foreach(MainState.orders, order_card),
                     class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",

@@ -45,7 +45,8 @@ def cart() -> rx.Component:
         rx.el.main(
             rx.el.div(
                 rx.el.h1(
-                    "Shopping Cart", class_name="text-3xl font-bold text-gray-900 mb-8"
+                    "Carrito de Compras",
+                    class_name="text-3xl font-bold text-gray-900 mb-8",
                 ),
                 rx.cond(
                     MainState.cart.length() > 0,
@@ -65,7 +66,7 @@ def cart() -> rx.Component:
                             ),
                             rx.el.a(
                                 rx.el.button(
-                                    "Checkout",
+                                    "Pagar",
                                     class_name="w-full bg-violet-500 text-white py-3 rounded-lg hover:bg-violet-600 transition-colors shadow-md",
                                 ),
                                 href="/checkout",
@@ -76,9 +77,9 @@ def cart() -> rx.Component:
                         class_name="bg-white p-8 rounded-xl shadow-md border",
                     ),
                     rx.el.div(
-                        rx.el.p("Your cart is empty.", class_name="text-gray-500"),
+                        rx.el.p("Tu carrito está vacío.", class_name="text-gray-500"),
                         rx.el.a(
-                            "Continue Shopping",
+                            "Seguir Comprando",
                             href="/",
                             class_name="mt-4 inline-block bg-violet-500 text-white px-6 py-2 rounded-lg",
                         ),

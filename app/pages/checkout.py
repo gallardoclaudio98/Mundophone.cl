@@ -9,13 +9,14 @@ def checkout() -> rx.Component:
         navbar(),
         rx.el.main(
             rx.el.div(
-                rx.el.h1("Checkout", class_name="text-3xl font-bold mb-8"),
+                rx.el.h1("Pagar", class_name="text-3xl font-bold mb-8"),
                 rx.cond(
                     (MainState.cart.length() > 0)
                     | MainState.buy_now_item.is_not_none(),
                     rx.el.div(
                         rx.el.h2(
-                            "Order Summary", class_name="text-xl font-semibold mb-4"
+                            "Resumen de la Orden",
+                            class_name="text-xl font-semibold mb-4",
                         ),
                         rx.cond(
                             MainState.buy_now_item.is_not_none(),
@@ -53,7 +54,7 @@ def checkout() -> rx.Component:
                             class_name="flex justify-between items-center mt-4",
                         ),
                         rx.el.button(
-                            "Pay with Webpay",
+                            "Pagar con Webpay",
                             on_click=PaymentState.initiate_webpay_transaction,
                             is_loading=PaymentState.webpay_url != "",
                             class_name="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md",
@@ -62,7 +63,7 @@ def checkout() -> rx.Component:
                     ),
                     rx.el.div(
                         rx.el.p(
-                            "Your cart is empty. Nothing to checkout.",
+                            "Tu carrito está vacío. No hay nada que pagar.",
                             class_name="text-gray-500",
                         ),
                         class_name="text-center p-16 bg-white rounded-xl shadow-md border max-w-lg mx-auto",

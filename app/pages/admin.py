@@ -27,7 +27,7 @@ def order_row(order: Order) -> rx.Component:
                     order.get("items"),
                     lambda item: rx.el.li(
                         item.get("quantity").to_string()
-                        + "x Product ID "
+                        + "x ID Producto "
                         + item.get("product_id").to_string()
                         + " ("
                         + item.get("color")
@@ -44,13 +44,13 @@ def order_row(order: Order) -> rx.Component:
             rx.el.span(
                 order.get("status"),
                 class_name=rx.cond(
-                    order.get("status") == "Delivered",
+                    order.get("status") == "Entregado",
                     "bg-green-100 text-green-800",
                     rx.cond(
-                        order.get("status") == "Shipped",
+                        order.get("status") == "Enviado",
                         "bg-blue-100 text-blue-800",
                         rx.cond(
-                            order.get("status") == "Processing",
+                            order.get("status") == "Procesando",
                             "bg-yellow-100 text-yellow-800",
                             "bg-orange-100 text-orange-800",
                         ),
@@ -70,10 +70,10 @@ def admin() -> rx.Component:
         rx.el.main(
             rx.el.div(
                 rx.el.div(
-                    rx.el.h1("Admin Dashboard", class_name="text-3xl font-bold"),
+                    rx.el.h1("Panel de Administrador", class_name="text-3xl font-bold"),
                     rx.el.button(
                         rx.icon("download", class_name="mr-2"),
-                        "Export Orders",
+                        "Exportar Órdenes",
                         on_click=MainState.export_orders,
                         class_name="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors",
                     ),
@@ -81,41 +81,45 @@ def admin() -> rx.Component:
                 ),
                 rx.el.div(
                     stat_card(
-                        "Processing",
-                        MainState.order_stats["Processing"],
+                        "Procesando",
+                        MainState.order_stats["Procesando"],
                         "yellow",
                         "loader",
                     ),
                     stat_card(
-                        "Shipped", MainState.order_stats["Shipped"], "blue", "truck"
+                        "Enviado", MainState.order_stats["Enviado"], "blue", "truck"
                     ),
                     stat_card(
-                        "Delivered",
-                        MainState.order_stats["Delivered"],
+                        "Entregado",
+                        MainState.order_stats["Entregado"],
                         "green",
                         "check_check",
                     ),
                     stat_card(
-                        "Revision",
-                        MainState.order_stats["Revision Requested"],
+                        "Revisión",
+                        MainState.order_stats["Revisión Solicitada"],
                         "orange",
                         "flag_triangle_right",
                     ),
                     class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8",
                 ),
                 rx.el.div(
-                    rx.el.h2("All Orders", class_name="text-2xl font-semibold mb-4"),
+                    rx.el.h2(
+                        "Todas las Órdenes", class_name="text-2xl font-semibold mb-4"
+                    ),
                     rx.el.div(
                         rx.el.table(
                             rx.el.thead(
                                 rx.el.tr(
                                     rx.el.th(
-                                        "Order ID", class_name="text-left px-4 py-3"
+                                        "ID de Orden", class_name="text-left px-4 py-3"
                                     ),
-                                    rx.el.th("Items", class_name="text-left px-4 py-3"),
+                                    rx.el.th(
+                                        "Productos", class_name="text-left px-4 py-3"
+                                    ),
                                     rx.el.th("Total", class_name="text-left px-4 py-3"),
                                     rx.el.th(
-                                        "Status", class_name="text-left px-4 py-3"
+                                        "Estado", class_name="text-left px-4 py-3"
                                     ),
                                     class_name="bg-gray-100 border-b",
                                 )

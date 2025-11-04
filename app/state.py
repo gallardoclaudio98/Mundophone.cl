@@ -31,7 +31,7 @@ class CartItem(TypedDict):
     color: str
 
 
-OrderStatus = Literal["Processing", "Shipped", "Delivered", "Revision Requested"]
+OrderStatus = Literal["Procesando", "Enviado", "Entregado", "Revisión Solicitada"]
 
 
 class Order(TypedDict):
@@ -67,7 +67,7 @@ class AuthState(rx.State):
         email = form_data["email"]
         password = form_data["password"]
         if email in self.USERS:
-            self.error_message = "Email already in use."
+            self.error_message = "El correo ya está en uso."
             yield rx.toast.error(self.error_message)
             return
         self.USERS[email] = {"password": password}
@@ -87,7 +87,7 @@ class AuthState(rx.State):
             self.error_message = ""
             return rx.redirect("/")
         else:
-            self.error_message = "Invalid email or password."
+            self.error_message = "Correo o contraseña inválidos."
             yield rx.toast.error(self.error_message)
 
     @rx.event
@@ -106,7 +106,9 @@ class AuthState(rx.State):
         if not self.in_session:
             return rx.redirect("/sign-in")
         if not self.is_admin:
-            yield rx.toast.error("Access denied. Admin privileges required.")
+            yield rx.toast.error(
+                "Acceso denegado. Se requieren privilegios de administrador."
+            )
             return rx.redirect("/")
 
     def _get_google_flow(self) -> Flow | None:
@@ -138,7 +140,7 @@ class AuthState(rx.State):
         flow = self._get_google_flow()
         if flow is None:
             return rx.toast.error(
-                "Google auth not configured. Please set environment variables."
+                "Autenticación de Google no configurada. Por favor, configure las variables de entorno."
             )
         authorization_url, _ = flow.authorization_url(
             access_type="offline", prompt="consent"
@@ -150,7 +152,9 @@ class AuthState(rx.State):
         client_id = os.getenv("GOOGLE_CLIENT_ID")
         flow = self._get_google_flow()
         if not client_id or flow is None:
-            yield rx.toast.error("Google auth configuration error.")
+            yield rx.toast.error(
+                "Error en la configuración de autenticación de Google."
+            )
             return rx.redirect("/sign-in")
         try:
             flow.fetch_token(authorization_response=str(self.router.page.raw_url))
@@ -160,7 +164,7 @@ class AuthState(rx.State):
             )
             email = id_info.get("email")
             if not email:
-                self.error_message = "Could not retrieve email from Google."
+                self.error_message = "No se pudo obtener el correo de Google."
                 yield rx.toast.error(self.error_message)
                 return rx.redirect("/sign-in")
             if email not in self.USERS:
@@ -168,11 +172,11 @@ class AuthState(rx.State):
             self.in_session = True
             self.current_user_email = email
             self.error_message = ""
-            yield rx.toast.success(f"Welcome {email}!")
+            yield rx.toast.success(f"¡Bienvenido {email}!")
             return rx.redirect("/")
         except Exception as e:
-            logging.exception(f"Google OAuth Error: {e}")
-            self.error_message = "An error occurred during Google authentication."
+            logging.exception(f"Error de Google OAuth: {e}")
+            self.error_message = "Ocurrió un error durante la autenticación con Google."
             yield rx.toast.error(self.error_message)
             return rx.redirect("/sign-in")
 
@@ -185,7 +189,7 @@ class MainState(rx.State):
             "brand": "Google",
             "price": 999.0,
             "image": "/pixel8pro.png",
-            "description": "The most powerful Pixel yet, with a pro-level camera system.",
+            "description": "El Pixel más potente hasta la fecha, con un sistema de cámara de nivel profesional.",
             "colors": ["Obsidian", "Porcelain", "Bay"],
             "category": "smartphone",
             "discount_price": 949.0,
@@ -196,7 +200,7 @@ class MainState(rx.State):
             "brand": "Apple",
             "price": 1099.0,
             "image": "/iphone15pro.png",
-            "description": "A total powerhouse. A new, lighter, and stronger titanium design.",
+            "description": "Una bestia. Un nuevo diseño de titanio, más ligero y resistente.",
             "colors": [
                 "Natural Titanium",
                 "Blue Titanium",
@@ -212,7 +216,7 @@ class MainState(rx.State):
             "brand": "Samsung",
             "price": 1299.0,
             "image": "/s24ultra.png",
-            "description": "Unleash new levels of creativity, productivity and possibility with Galaxy AI.",
+            "description": "Libera nuevos niveles de creatividad, productividad y posibilidades con Galaxy AI.",
             "colors": ["Titanium Gray", "Titanium Black", "Titanium Violet"],
             "category": "smartphone",
             "discount_price": 1199.0,
@@ -223,7 +227,7 @@ class MainState(rx.State):
             "brand": "OnePlus",
             "price": 799.0,
             "image": "/oneplus12.png",
-            "description": "Elite performance, from the inside out. A multi-layered flagship experience.",
+            "description": "Rendimiento de élite, de adentro hacia afuera. Una experiencia insignia de varias capas.",
             "colors": ["Silky Black", "Flowy Emerald"],
             "category": "smartphone",
             "discount_price": None,
@@ -234,7 +238,7 @@ class MainState(rx.State):
             "brand": "Sony",
             "price": 1399.0,
             "image": "/xperia1v.png",
-            "description": "Next-gen sensor and computational processing for stunning image quality.",
+            "description": "Sensor de última generación y procesamiento computacional para una calidad de imagen asombrosa.",
             "colors": ["Black", "Platinum Silver"],
             "category": "smartphone",
             "discount_price": None,
@@ -245,7 +249,7 @@ class MainState(rx.State):
             "brand": "Nothing",
             "price": 599.0,
             "image": "/nothingphone2.png",
-            "description": "A new way to interact with a smartphone through a redesigned Glyph Interface.",
+            "description": "Una nueva forma de interactuar con un smartphone a través de una Interfaz Glyph rediseñada.",
             "colors": ["White", "Dark Gray"],
             "category": "smartphone",
             "discount_price": 549.0,
@@ -255,8 +259,8 @@ class MainState(rx.State):
             "name": "MacBook Air M3",
             "brand": "Apple",
             "price": 1099.0,
-            "image": "/placeholder.svg",
-            "description": "Supercharged by the M3 chip, the 13-inch MacBook Air is a supremely portable laptop.",
+            "image": "/macbookairm3.png",
+            "description": "Potenciada por el chip M3, la MacBook Air de 13 pulgadas es una laptop sumamente portátil.",
             "colors": ["Space Gray", "Silver", "Starlight", "Midnight"],
             "category": "notebook",
             "discount_price": None,
@@ -266,8 +270,8 @@ class MainState(rx.State):
             "name": "Dell XPS 15",
             "brand": "Dell",
             "price": 1499.0,
-            "image": "/placeholder.svg",
-            "description": "Stunning display, immersive sound and a sophisticated design.",
+            "image": "/dellxps15.png",
+            "description": "Pantalla impresionante, sonido envolvente y un diseño sofisticado.",
             "colors": ["Platinum", "Graphite"],
             "category": "notebook",
             "discount_price": 1399.0,
@@ -277,8 +281,8 @@ class MainState(rx.State):
             "name": "Lenovo ThinkPad X1",
             "brand": "Lenovo",
             "price": 1599.0,
-            "image": "/placeholder.svg",
-            "description": "Ultralight. Ultrapowerful. Ultra-no-brainer. For the ultimate business laptop.",
+            "image": "/thinkpadx1.png",
+            "description": "Ultraligero. ultrapotente. Ultra-evidente. Para el portátil de negocios definitivo.",
             "colors": ["Black"],
             "category": "notebook",
             "discount_price": None,
@@ -288,8 +292,8 @@ class MainState(rx.State):
             "name": "AirPods Pro 2",
             "brand": "Apple",
             "price": 249.0,
-            "image": "/placeholder.svg",
-            "description": "Rebuilt from the ground up for even richer audio.",
+            "image": "/airpodspro2.png",
+            "description": "Reconstruido desde cero para un audio aún más rico.",
             "colors": ["White"],
             "category": "accessory",
             "discount_price": 229.0,
@@ -299,8 +303,8 @@ class MainState(rx.State):
             "name": "Sony WH-1000XM5",
             "brand": "Sony",
             "price": 399.0,
-            "image": "/placeholder.svg",
-            "description": "The best noise canceling headphones on the market, now even better.",
+            "image": "/sonyxm5.png",
+            "description": "Los mejores audífonos con cancelación de ruido del mercado, ahora aún mejores.",
             "colors": ["Black", "Silver"],
             "category": "accessory",
             "discount_price": None,
@@ -310,8 +314,8 @@ class MainState(rx.State):
             "name": "Anker PowerCore 24K",
             "brand": "Anker",
             "price": 149.99,
-            "image": "/placeholder.svg",
-            "description": "Ultra-Powerful Two-Way Charging: Equipped with the latest Power Delivery 3.1.",
+            "image": "/ankerpowercore.png",
+            "description": "Carga bidireccional ultrapotente: equipado con lo último en Power Delivery 3.1.",
             "colors": ["Black"],
             "category": "accessory",
             "discount_price": None,
@@ -321,8 +325,8 @@ class MainState(rx.State):
             "name": "JBL Charge 5",
             "brand": "JBL",
             "price": 179.95,
-            "image": "/placeholder.svg",
-            "description": "Take the party with you no matter what the weather.",
+            "image": "/jblcharge5.png",
+            "description": "Lleva la fiesta contigo sin importar el clima.",
             "colors": ["Black", "Blue", "Red", "Teal"],
             "category": "accessory",
             "discount_price": 149.95,
@@ -334,7 +338,7 @@ class MainState(rx.State):
             "id": 1,
             "items": [{"product_id": 2, "quantity": 1, "color": "Natural Titanium"}],
             "total": 1099.0,
-            "status": "Delivered",
+            "status": "Entregado",
         },
         {
             "id": 2,
@@ -343,7 +347,7 @@ class MainState(rx.State):
                 {"product_id": 4, "quantity": 1, "color": "Silky Black"},
             ],
             "total": 1798.0,
-            "status": "Shipped",
+            "status": "Enviado",
         },
     ]
     search_query: str = ""
@@ -479,12 +483,12 @@ class MainState(rx.State):
         for item in self.cart:
             if item["product_id"] == product_id and item["color"] == color:
                 item["quantity"] += quantity
-                yield rx.toast.success(f"Updated {color} item in cart!")
+                yield rx.toast.success(f"¡Producto {color} actualizado en el carrito!")
                 return
         self.cart.append(
             {"product_id": product_id, "quantity": quantity, "color": color}
         )
-        yield rx.toast.success("Added to cart!")
+        yield rx.toast.success("¡Añadido al carrito!")
 
     @rx.event
     def remove_from_cart(self, product_id: int):
@@ -504,7 +508,7 @@ class MainState(rx.State):
     @rx.event
     def checkout(self):
         if not self.cart and (not self.buy_now_item):
-            return rx.toast.error("Your cart is empty.")
+            return rx.toast.error("Tu carrito está vacío.")
         return rx.redirect("/checkout")
 
     @rx.event
@@ -529,31 +533,44 @@ class MainState(rx.State):
     def request_revision(self, order_id: int):
         for order in self.orders:
             if order["id"] == order_id:
-                order["status"] = "Revision Requested"
-                yield rx.toast.info("Revision requested for your order.")
+                order["status"] = "Revisión Solicitada"
+                yield rx.toast.info("Revisión solicitada para tu orden.")
                 return
 
     @rx.var
     def order_stats(self) -> dict[str, int]:
-        stats = {"Processing": 0, "Shipped": 0, "Delivered": 0, "Revision Requested": 0}
+        stats = {
+            "Procesando": 0,
+            "Enviado": 0,
+            "Entregado": 0,
+            "Revisión Solicitada": 0,
+        }
         for order in self.orders:
-            stats[order["status"]] += 1
+            if order["status"] in stats:
+                stats[order["status"]] += 1
         return stats
 
     @rx.event
     def export_orders(self):
         if not self.orders:
-            return rx.toast.warning("No orders to export.")
+            return rx.toast.warning("No hay órdenes para exportar.")
         output = io.StringIO()
         writer = csv.writer(output)
-        headers = ["Order ID", "Total", "Status", "Product Name", "Quantity", "Color"]
+        headers = [
+            "ID Orden",
+            "Total",
+            "Estado",
+            "Nombre Producto",
+            "Cantidad",
+            "Color",
+        ]
         writer.writerow(headers)
         for order in self.orders:
             for item in order["items"]:
                 product = next(
                     (p for p in self.products if p["id"] == item["product_id"]), None
                 )
-                product_name = product["name"] if product else "Unknown"
+                product_name = product["name"] if product else "Desconocido"
                 writer.writerow(
                     [
                         order["id"],
@@ -565,7 +582,7 @@ class MainState(rx.State):
                     ]
                 )
         csv_data = output.getvalue()
-        return rx.download(data=csv_data, filename="orders.csv")
+        return rx.download(data=csv_data, filename="ordenes.csv")
 
 
 class PaymentState(rx.State):
@@ -602,7 +619,7 @@ class PaymentState(rx.State):
             items_to_purchase = main_state.cart_items_detailed
             total_amount = main_state.cart_total
         else:
-            yield rx.toast.error("Nothing to purchase.")
+            yield rx.toast.error("No hay nada para comprar.")
             return
         self.payment_amount = total_amount
         self.pending_order_id = self._generate_short_order_id()
@@ -620,8 +637,8 @@ class PaymentState(rx.State):
             yield rx.redirect(self.webpay_url)
             return
         except Exception as e:
-            logging.exception(f"WebPay Error: {e}")
-            yield rx.toast.error(f"WebPay Error: {str(e)}")
+            logging.exception(f"Error de WebPay: {e}")
+            yield rx.toast.error(f"Error de WebPay: {str(e)}")
 
     @rx.event
     async def confirm_payment(self):
@@ -630,19 +647,19 @@ class PaymentState(rx.State):
         tbk_id_session = self.router.page.params.get("TBK_ID_SESION")
         tbk_orden_compra = self.router.page.params.get("TBK_ORDEN_COMPRA")
         if tbk_token and tbk_orden_compra:
-            self.payment_status = "Cancelled"
-            yield rx.toast.warning("Payment cancelled.")
+            self.payment_status = "Cancelado"
+            yield rx.toast.warning("Pago cancelado.")
             yield rx.redirect("/cart")
             return
         if not token:
-            self.payment_status = "Failed"
-            yield rx.toast.error("Invalid payment token.")
+            self.payment_status = "Fallido"
+            yield rx.toast.error("Token de pago inválido.")
             return
         try:
             tx = self._get_tx()
             response = tx.commit(token)
             if response.status == "AUTHORIZED":
-                self.payment_status = "Success"
+                self.payment_status = "Éxito"
                 main_state = await self.get_state(MainState)
                 new_order_id = max([o["id"] for o in main_state.orders] + [0]) + 1
                 items_for_order = []
@@ -659,16 +676,16 @@ class PaymentState(rx.State):
                     "id": new_order_id,
                     "items": items_for_order,
                     "total": order_total,
-                    "status": "Processing",
+                    "status": "Procesando",
                 }
                 main_state.orders.append(new_order)
-                yield rx.toast.success("Payment successful! Order placed.")
+                yield rx.toast.success("¡Pago exitoso! Orden creada.")
                 yield rx.redirect("/profile")
                 return
             else:
-                self.payment_status = "Failed"
-                yield rx.toast.error(f"Payment failed: {response.response_code}")
+                self.payment_status = "Fallido"
+                yield rx.toast.error(f"Pago fallido: {response.response_code}")
         except Exception as e:
-            logging.exception(f"WebPay Confirmation Error: {e}")
-            self.payment_status = "Failed"
-            yield rx.toast.error(f"WebPay Confirmation Error: {str(e)}")
+            logging.exception(f"Error de confirmación de WebPay: {e}")
+            self.payment_status = "Fallido"
+            yield rx.toast.error(f"Error de confirmación de WebPay: {str(e)}")

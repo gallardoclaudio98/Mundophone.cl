@@ -37,13 +37,13 @@ def smartphones() -> rx.Component:
                     rx.el.div(
                         rx.el.input(
                             type="number",
-                            placeholder="Min Price",
+                            placeholder="Precio Mín",
                             on_change=MainState.set_filter_min_price,
                             class_name="p-3 border rounded-lg w-full",
                         ),
                         rx.el.input(
                             type="number",
-                            placeholder="Max Price",
+                            placeholder="Precio Máx",
                             on_change=MainState.set_filter_max_price,
                             class_name="p-3 border rounded-lg w-full",
                         ),

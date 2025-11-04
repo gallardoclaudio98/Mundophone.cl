@@ -5,7 +5,7 @@ def footer() -> rx.Component:
     return rx.el.footer(
         rx.el.div(
             rx.el.p(
-                "© 2024 MobileShop. All rights reserved.",
+                "© 2024 MobileShop. Todos los derechos reservados.",
                 class_name="text-sm text-gray-500",
             ),
             rx.el.div(

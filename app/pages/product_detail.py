@@ -90,9 +90,20 @@ def product_detail() -> rx.Component:
                                 class_name="flex items-center mb-4",
                             ),
                             rx.el.div(
+                                rx.el.label("Cantidad:", class_name="font-semibold"),
+                                rx.el.input(
+                                    type="number",
+                                    default_value=MainState.selected_quantity.to_string(),
+                                    on_change=MainState.set_selected_quantity,
+                                    min=1,
+                                    class_name="w-20 p-2 border rounded-lg text-center ml-2",
+                                ),
+                                class_name="flex items-center mb-4",
+                            ),
+                            rx.el.div(
                                 rx.el.button(
                                     rx.icon("shopping-cart", class_name="mr-2"),
-                                    "Add to Cart",
+                                    "Añadir al Carrito",
                                     on_click=lambda: MainState.add_to_cart(
                                         MainState.selected_product["id"],
                                         MainState.selected_quantity,
@@ -102,7 +113,7 @@ def product_detail() -> rx.Component:
                                 ),
                                 rx.el.button(
                                     rx.icon("zap", class_name="mr-2"),
-                                    "Buy Now",
+                                    "Comprar Ahora",
                                     on_click=lambda: MainState.buy_now(
                                         MainState.selected_product["id"],
                                         MainState.selected_quantity,
@@ -118,7 +129,7 @@ def product_detail() -> rx.Component:
                     ),
                     rx.el.div(
                         rx.el.h2(
-                            "On Sale Now",
+                            "En Oferta Ahora",
                             class_name="text-2xl font-bold text-center mb-8",
                         ),
                         rx.el.div(
@@ -130,7 +141,7 @@ def product_detail() -> rx.Component:
                     class_name="container mx-auto px-4 py-12",
                 ),
                 rx.el.div(
-                    rx.el.p("Loading product..."), class_name="text-center py-20"
+                    rx.el.p("Cargando producto..."), class_name="text-center py-20"
                 ),
             )
         ),
