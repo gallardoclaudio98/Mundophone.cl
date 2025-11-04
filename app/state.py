@@ -31,14 +31,25 @@ class CartItem(TypedDict):
     color: str
 
 
-OrderStatus = Literal["Procesando", "Enviado", "Entregado", "Revisión Solicitada"]
+from datetime import datetime
+
+OrderStatus = Literal[
+    "Pendiente",
+    "Procesando",
+    "Enviado",
+    "Entregado",
+    "Cancelado",
+    "Revisión Solicitada",
+]
 
 
 class Order(TypedDict):
     id: int
+    customer_email: str
     items: list[CartItem]
     total: float
     status: OrderStatus
+    created_at: str
 
 
 class DetailedCartItem(TypedDict):
@@ -46,6 +57,31 @@ class DetailedCartItem(TypedDict):
     quantity: int
     subtotal: float
     color: str
+
+
+class Transaction(TypedDict):
+    id: str
+    order_id: int
+    type: Literal["Ingreso", "Egreso"]
+    amount: float
+    date: str
+    description: str
+
+
+class Transaction(TypedDict):
+    id: str
+    order_id: int
+    type: Literal["Ingreso", "Egreso"]
+    amount: float
+    date: str
+    description: str
+
+
+class Notification(TypedDict):
+    id: str
+    message: str
+    read: bool
+    created_at: str
 
 
 class AuthState(rx.State):
@@ -336,18 +372,30 @@ class MainState(rx.State):
     orders: list[Order] = [
         {
             "id": 1,
+            "customer_email": "comprador1@example.com",
             "items": [{"product_id": 2, "quantity": 1, "color": "Natural Titanium"}],
             "total": 1099.0,
             "status": "Entregado",
+            "created_at": "2024-05-20T10:00:00",
         },
         {
             "id": 2,
+            "customer_email": "comprador2@example.com",
             "items": [
                 {"product_id": 1, "quantity": 1, "color": "Obsidian"},
                 {"product_id": 4, "quantity": 1, "color": "Silky Black"},
             ],
             "total": 1798.0,
             "status": "Enviado",
+            "created_at": "2024-05-21T11:30:00",
+        },
+        {
+            "id": 3,
+            "customer_email": "comprador1@example.com",
+            "items": [{"product_id": 10, "quantity": 2, "color": "White"}],
+            "total": 458.0,
+            "status": "Pendiente",
+            "created_at": "2024-05-22T09:00:00",
         },
     ]
     search_query: str = ""
@@ -530,11 +578,27 @@ class MainState(rx.State):
             self.buy_now_item = None
 
     @rx.event
-    def request_revision(self, order_id: int):
+    async def request_revision(self, order_id: int):
+        auth_state = await self.get_state(AuthState)
+        if not auth_state.current_user_email:
+            yield rx.toast.error("Debes iniciar sesión.")
+            return
         for order in self.orders:
-            if order["id"] == order_id:
-                order["status"] = "Revisión Solicitada"
-                yield rx.toast.info("Revisión solicitada para tu orden.")
+            if (
+                order["id"] == order_id
+                and order["customer_email"] == auth_state.current_user_email
+            ):
+                if order["status"] == "Entregado":
+                    order["status"] = "Revisión Solicitada"
+                    admin_state = await self.get_state(AdminState)
+                    yield admin_state.add_notification(
+                        f"El cliente {auth_state.current_user_email} solicitó revisión para la orden #{order_id}."
+                    )
+                    yield rx.toast.info("Revisión solicitada para tu orden.")
+                else:
+                    yield rx.toast.warning(
+                        "Solo puedes solicitar revisión de órdenes entregadas."
+                    )
                 return
 
     @rx.var
@@ -583,6 +647,222 @@ class MainState(rx.State):
                 )
         csv_data = output.getvalue()
         return rx.download(data=csv_data, filename="ordenes.csv")
+
+
+class AdminState(rx.State):
+    orders: list[Order] = []
+    filter_date_from: str = ""
+    filter_date_to: str = ""
+    filter_customer: str = ""
+    filter_order_status: str = ""
+    current_page: int = 1
+    items_per_page: int = 10
+    show_order_detail: bool = False
+    selected_order: Optional[Order] = None
+    notifications: list[Notification] = []
+
+    @rx.var
+    def unique_customers(self) -> list[str]:
+        return sorted(list(set((order["customer_email"] for order in self.orders))))
+
+    @rx.var
+    def filtered_orders(self) -> list[Order]:
+        orders_to_filter = self.orders
+        if self.filter_order_status:
+            orders_to_filter = [
+                o for o in orders_to_filter if o["status"] == self.filter_order_status
+            ]
+        if self.filter_customer:
+            orders_to_filter = [
+                o
+                for o in orders_to_filter
+                if o["customer_email"] == self.filter_customer
+            ]
+        if self.filter_date_from:
+            orders_to_filter = [
+                o for o in orders_to_filter if o["created_at"] >= self.filter_date_from
+            ]
+        if self.filter_date_to:
+            orders_to_filter = [
+                o for o in orders_to_filter if o["created_at"] <= self.filter_date_to
+            ]
+        return sorted(orders_to_filter, key=lambda o: o["created_at"], reverse=True)
+
+    @rx.var
+    def total_pages(self) -> int:
+        return -(-len(self.filtered_orders) // self.items_per_page)
+
+    @rx.var
+    def paginated_orders(self) -> list[Order]:
+        start = (self.current_page - 1) * self.items_per_page
+        end = start + self.items_per_page
+        return self.filtered_orders[start:end]
+
+    @rx.event
+    def clear_filters(self):
+        self.filter_date_from = ""
+        self.filter_date_to = ""
+        self.filter_customer = ""
+        self.filter_order_status = ""
+        self.current_page = 1
+
+    @rx.event
+    def next_page(self):
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+
+    @rx.event
+    def prev_page(self):
+        if self.current_page > 1:
+            self.current_page -= 1
+
+    @rx.event
+    async def load_all_orders(self):
+        main_state = await self.get_state(MainState)
+        self.orders = main_state.orders
+
+    @rx.event
+    async def change_order_status(self, order_id: int, status: str):
+        main_state = await self.get_state(MainState)
+        for i, order in enumerate(main_state.orders):
+            if order["id"] == order_id:
+                main_state.orders[i]["status"] = status
+                self.orders = main_state.orders
+                yield rx.toast.success(f"Orden #{order_id} actualizada a {status}")
+                return
+
+    @rx.event
+    def accept_order(self, order_id: int):
+        yield AdminState.change_order_status(order_id, "Procesando")
+
+    @rx.event
+    def cancel_order(self, order_id: int):
+        yield AdminState.change_order_status(order_id, "Cancelado")
+
+    @rx.event
+    def view_order_details(self, order: Order):
+        self.selected_order = order
+        self.show_order_detail = True
+
+    @rx.event
+    def close_order_detail_modal(self):
+        self.show_order_detail = False
+        self.selected_order = None
+
+    @rx.var
+    def unread_notifications_count(self) -> int:
+        return sum((1 for n in self.notifications if not n["read"]))
+
+    @rx.event
+    def add_notification(self, message: str):
+        self.notifications.insert(
+            0,
+            {
+                "id": str(uuid.uuid4()),
+                "message": message,
+                "read": False,
+                "created_at": datetime.now().isoformat(),
+            },
+        )
+        yield rx.toast.info(message)
+
+    @rx.event
+    def mark_notification_as_read(self, notification_id: str):
+        for i, n in enumerate(self.notifications):
+            if n["id"] == notification_id:
+                self.notifications[i]["read"] = True
+                return
+
+    @rx.event
+    def mark_all_as_read(self):
+        for i in range(len(self.notifications)):
+            self.notifications[i]["read"] = True
+
+    transactions: list[Transaction] = []
+
+    @rx.event
+    def add_transaction(
+        self, order_id: int, type: str, amount: float, description: str
+    ):
+        self.transactions.append(
+            {
+                "id": str(uuid.uuid4()),
+                "order_id": order_id,
+                "type": type,
+                "amount": amount,
+                "date": datetime.now().isoformat(),
+                "description": description,
+            }
+        )
+
+    @rx.var
+    def monthly_income(self) -> dict[str, float]:
+        income_by_month: dict[str, float] = {}
+        for tx in self.transactions:
+            if tx["type"] == "Ingreso":
+                month = datetime.fromisoformat(tx["date"]).strftime("%Y-%m")
+                income_by_month[month] = income_by_month.get(month, 0) + tx["amount"]
+        return income_by_month
+
+    @rx.var
+    def monthly_income_chart_data(self) -> list[dict]:
+        return [
+            {"month": month, "ingresos": amount}
+            for month, amount in sorted(self.monthly_income.items())
+        ]
+
+    @rx.var
+    def total_sales(self) -> float:
+        return sum((o["total"] for o in self.orders))
+
+    @rx.var
+    def average_order_value(self) -> float:
+        if not self.orders:
+            return 0.0
+        return self.total_sales / len(self.orders)
+
+    transactions: list[Transaction] = []
+
+    @rx.event
+    def add_transaction(
+        self, order_id: int, type: str, amount: float, description: str
+    ):
+        self.transactions.append(
+            {
+                "id": str(uuid.uuid4()),
+                "order_id": order_id,
+                "type": type,
+                "amount": amount,
+                "date": datetime.now().isoformat(),
+                "description": description,
+            }
+        )
+
+    @rx.var
+    def monthly_income(self) -> dict[str, float]:
+        income_by_month: dict[str, float] = {}
+        for tx in self.transactions:
+            if tx["type"] == "Ingreso":
+                month = datetime.fromisoformat(tx["date"]).strftime("%Y-%m")
+                income_by_month[month] = income_by_month.get(month, 0) + tx["amount"]
+        return income_by_month
+
+    @rx.var
+    def monthly_income_chart_data(self) -> list[dict]:
+        return [
+            {"month": month, "ingresos": amount}
+            for month, amount in sorted(self.monthly_income.items())
+        ]
+
+    @rx.var
+    def total_sales(self) -> float:
+        return sum((o["total"] for o in self.orders))
+
+    @rx.var
+    def average_order_value(self) -> float:
+        if not self.orders:
+            return 0.0
+        return self.total_sales / len(self.orders)
 
 
 class PaymentState(rx.State):
@@ -672,14 +952,31 @@ class PaymentState(rx.State):
                     items_for_order = main_state.cart.copy()
                     order_total = main_state.cart_total
                     main_state.cart = []
+                auth_state = await self.get_state(AuthState)
                 new_order: Order = {
                     "id": new_order_id,
+                    "customer_email": auth_state.current_user_email
+                    or "anonimo@example.com",
                     "items": items_for_order,
                     "total": order_total,
-                    "status": "Procesando",
+                    "status": "Pendiente",
+                    "created_at": datetime.now().isoformat(),
                 }
                 main_state.orders.append(new_order)
-                yield rx.toast.success("¡Pago exitoso! Orden creada.")
+                admin_state = await self.get_state(AdminState)
+                main_state.orders.append(new_order)
+                yield AdminState.add_transaction(
+                    order_id=new_order_id,
+                    type="Ingreso",
+                    amount=order_total,
+                    description=f"Venta de orden #{new_order_id}",
+                )
+                yield admin_state.add_notification(
+                    f"Nueva orden #{new_order_id} recibida por ${order_total:.2f}."
+                )
+                yield rx.toast.success(
+                    "¡Pago exitoso! Orden creada y pendiente de aprobación."
+                )
                 yield rx.redirect("/profile")
                 return
             else:

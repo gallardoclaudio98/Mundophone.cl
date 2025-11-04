@@ -1,5 +1,63 @@
 import reflex as rx
-from app.state import AuthState
+from app.state import AuthState, AdminState, Notification
+
+
+def notification_item(notification: Notification) -> rx.Component:
+    return rx.el.div(
+        rx.el.p(notification["message"], class_name="text-sm"),
+        rx.el.p(notification["created_at"], class_name="text-xs text-gray-500 mt-1"),
+        class_name=rx.cond(
+            notification["read"],
+            "p-2 border-b border-gray-100",
+            "p-2 border-b border-gray-100 bg-blue-50",
+        ),
+        on_click=AdminState.mark_notification_as_read(notification["id"]),
+    )
+
+
+def notifications_panel() -> rx.Component:
+    return rx.radix.dropdown_menu.root(
+        rx.radix.dropdown_menu.trigger(
+            rx.el.button(
+                rx.icon("bell", class_name="h-6 w-6"),
+                rx.cond(
+                    AdminState.unread_notifications_count > 0,
+                    rx.el.span(
+                        AdminState.unread_notifications_count.to_string(),
+                        class_name="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center",
+                    ),
+                    rx.fragment(),
+                ),
+                class_name="relative p-2 rounded-full hover:bg-gray-100 transition-colors",
+            )
+        ),
+        rx.radix.dropdown_menu.content(
+            rx.el.div(
+                rx.el.div(
+                    rx.el.h3("Notificaciones", class_name="font-semibold"),
+                    rx.el.button(
+                        "Marcar todo como leído",
+                        on_click=AdminState.mark_all_as_read,
+                        class_name="text-sm text-blue-600 hover:underline",
+                    ),
+                    class_name="flex justify-between items-center p-2 border-b",
+                ),
+                rx.el.div(
+                    rx.foreach(AdminState.notifications, notification_item),
+                    class_name="max-h-96 overflow-y-auto",
+                ),
+                rx.cond(
+                    AdminState.notifications.length() == 0,
+                    rx.el.p(
+                        "No hay notificaciones",
+                        class_name="p-4 text-center text-sm text-gray-500",
+                    ),
+                    rx.fragment(),
+                ),
+            ),
+            class_name="w-80 bg-white rounded-lg shadow-lg border z-50",
+        ),
+    )
 
 
 def navbar() -> rx.Component:
@@ -59,13 +117,16 @@ def navbar() -> rx.Component:
                     AuthState.in_session,
                     rx.el.div(
                         rx.cond(
+                            AuthState.is_admin, notifications_panel(), rx.fragment()
+                        ),
+                        rx.cond(
                             AuthState.is_admin,
+                            rx.fragment(),
                             rx.el.a(
                                 rx.icon("shield", class_name="h-6 w-6"),
                                 href="/admin",
                                 class_name="p-2 rounded-full hover:bg-gray-100 transition-colors text-blue-600",
                             ),
-                            rx.fragment(),
                         ),
                         rx.el.a(
                             rx.icon("user", class_name="h-6 w-6"),

@@ -28,11 +28,18 @@ def order_card(order: Order) -> rx.Component:
             class_name="flex justify-between items-center",
         ),
         rx.el.p(f"Total: ${order['total']:.2f}", class_name="text-gray-600 my-2"),
-        rx.el.button(
-            "Solicitar Revisión",
-            on_click=lambda: MainState.request_revision(order["id"]),
-            disabled=order["status"] != "Entregado",
-            class_name="w-full text-sm py-2 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed",
+        rx.cond(
+            order["status"] == "Entregado",
+            rx.el.button(
+                "Solicitar Revisión",
+                on_click=MainState.request_revision(order["id"]),
+                class_name="w-full text-sm py-2 rounded-lg bg-orange-100 text-orange-800 hover:bg-orange-200",
+            ),
+            rx.el.button(
+                "Solicitar Revisión",
+                disabled=True,
+                class_name="w-full text-sm py-2 rounded-lg bg-gray-200 text-gray-500 disabled:opacity-70 disabled:cursor-not-allowed",
+            ),
         ),
         class_name="p-4 bg-white border rounded-lg shadow-sm",
     )

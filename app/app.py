@@ -8,7 +8,7 @@ from app.pages.product_detail import product_detail
 from app.pages.admin import admin
 from app.pages.checkout import checkout
 from app.pages.payment_callback import payment_callback
-from app.state import AuthState, MainState
+from app.state import AuthState, MainState, AdminState
 
 
 def placeholder_page(title: str) -> rx.Component:
@@ -54,7 +54,23 @@ app.add_page(
     route="/product/[product_id]",
     on_load=MainState.load_product_details,
 )
-app.add_page(admin, route="/admin", on_load=AuthState.check_admin)
+app.add_page(
+    admin, route="/admin", on_load=[AuthState.check_admin, AdminState.load_all_orders]
+)
+from app.pages.finance import finance
+
+app.add_page(
+    finance,
+    route="/admin/finance",
+    on_load=[AuthState.check_admin, AdminState.load_all_orders],
+)
+from app.pages.finance import finance
+
+app.add_page(
+    finance,
+    route="/admin/finance",
+    on_load=[AuthState.check_admin, AdminState.load_all_orders],
+)
 app.add_page(checkout, route="/checkout", on_load=AuthState.check_session)
 app.add_page(payment_callback, route="/payment/callback")
 from app.pages.accessories import accessories

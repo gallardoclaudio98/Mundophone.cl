@@ -5,6 +5,5 @@ transbank-sdk
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
-google-auth
-google-auth-oauthlib
-google-auth-httplib2
+aiosmtplib
+email-validator

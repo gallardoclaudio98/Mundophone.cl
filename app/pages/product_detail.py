@@ -90,17 +90,6 @@ def product_detail() -> rx.Component:
                                 class_name="flex items-center mb-4",
                             ),
                             rx.el.div(
-                                rx.el.label("Cantidad:", class_name="font-semibold"),
-                                rx.el.input(
-                                    type="number",
-                                    default_value=MainState.selected_quantity.to_string(),
-                                    on_change=MainState.set_selected_quantity,
-                                    min=1,
-                                    class_name="w-20 p-2 border rounded-lg text-center ml-2",
-                                ),
-                                class_name="flex items-center mb-4",
-                            ),
-                            rx.el.div(
                                 rx.el.button(
                                     rx.icon("shopping-cart", class_name="mr-2"),
                                     "Añadir al Carrito",
